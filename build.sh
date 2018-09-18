@@ -1,1 +1,1 @@
-g++ -Wall main.cpp `pkg-config --libs opencv` -o prog
+g++ -Wall -Wextra -g main.cpp `pkg-config --libs opencv` -o prog
