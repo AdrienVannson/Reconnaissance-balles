@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <queue>
+#include <cmath>
 
 #include "opencv2/imgproc.hpp"
 #include "opencv2/videoio.hpp"
@@ -61,8 +62,10 @@ std::vector<cv::Point> getPointsZone (cv::Mat &sontBalles, const cv::Point posDe
     return points;
 }
 
-void reconnaissanceBalles (cv::Mat &img)
+void reconnaissanceBalles (cv::Mat &imgDepart)
 {
+    cv::Mat img = imgDepart.clone();
+
     // Normalisation
     for (int iLigne=0; iLigne<img.rows; iLigne++) {
         for (int iColonne=0; iColonne<img.cols; iColonne++) {
@@ -87,12 +90,6 @@ void reconnaissanceBalles (cv::Mat &img)
     cv::Mat sontBalles;
     cv::inRange(img, cv::Scalar(0, 100, 100), cv::Scalar(40, 150, 150), sontBalles);
 
-    for (int x=0; x<img.cols; x++) {
-        for (int y=0; y<img.rows; y++) {
-            img.at<cv::Vec3b>(cv::Point(x, y)) = cv::Vec3b(0, 0, 0);
-        }
-    }
-
     int iCouleur = 0;
 
     // Flood-fill pour détecter les balles
@@ -106,9 +103,28 @@ void reconnaissanceBalles (cv::Mat &img)
 
                 if (points.size() > 1000) {
 
+                    // TODO: placer le centre afin de minimiser la distance max
+                    long long xTotal = 0;
+                    long long yTotal = 0;
+
                     for (const auto point : points) {
-                        img.at<cv::Vec3b>(point) = COULEURS[iCouleur];
+                        //img.at<cv::Vec3b>(point) = COULEURS[iCouleur];
+
+                        xTotal += point.x;
+                        yTotal += point.y;
                     }
+
+                    const int xCentre = xTotal / (int)points.size();
+                    const int yCentre = yTotal / (int)points.size();
+
+                    // Calcul du rayon
+                    int rayon = 0;
+                    for (const auto point : points) {
+                        const int dist = sqrt( (point.x-xCentre)*(point.x-xCentre) + (point.y-yCentre)*(point.y-yCentre) );
+                        rayon = max(dist, rayon);
+                    }
+
+                    cv::circle(imgDepart, cv::Point(xCentre, yCentre), rayon, COULEURS[iCouleur], 5);
 
                     iCouleur = (iCouleur+1) % NB_COULEURS;
                 }
@@ -123,7 +139,8 @@ int main ()
         "images/000.jpg",
         "images/001.jpg",
         "images/002.jpg",
-        "images/003.jpg"
+        "images/003.jpg",
+        "images/004.png",
     };
 
     for (auto filename : filenames) {
@@ -131,7 +148,7 @@ int main ()
 
         cv::resize(img, img, cv::Size(PICTURE_HEIGHT * img.cols / img.rows, PICTURE_HEIGHT));
 
-        cv::imshow("Avant ("+filename+")", img);
+        //cv::imshow("Avant ("+filename+")", img);
         reconnaissanceBalles(img);
         cv::imshow("Apres ("+filename+")", img);
     }
