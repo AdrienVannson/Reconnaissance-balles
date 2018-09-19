@@ -19,12 +19,18 @@ const cv::Vec3b COULEURS[NB_COULEURS] = {
     cv::Vec3b(0, 0, 255)
 };
 
-const int NB_DIRECTIONS = 4;
+const int NB_DIRECTIONS = 8;
 const int DELTAS_DIRECTIONS[NB_DIRECTIONS][2] = {
+    {-1, -1},
     {-1, 0},
-    {1, 0},
+    {-1, 1},
+
     {0, -1},
-    {0, 1}
+    {0, 1},
+
+    {1, -1},
+    {1, 0},
+    {1, 1}
 };
 
 
@@ -67,7 +73,7 @@ void reconnaissanceBalles (cv::Mat &imgDepart)
     cv::Mat img = imgDepart.clone();
 
     // Normalisation
-    for (int iLigne=0; iLigne<img.rows; iLigne++) {
+    /*for (int iLigne=0; iLigne<img.rows; iLigne++) {
         for (int iColonne=0; iColonne<img.cols; iColonne++) {
             cv::Vec3b &couleur = img.at<cv::Vec3b>(cv::Point(iColonne, iLigne));
 
@@ -85,14 +91,67 @@ void reconnaissanceBalles (cv::Mat &imgDepart)
                 }
             }
         }
+    }*/
+
+    //imgDepart = img.clone();
+
+    cv::Mat sontBalles (imgDepart.rows, imgDepart.cols, 0);
+
+    //cv::inRange(img, cv::Scalar(0, 100, 100), cv::Scalar(40, 150, 150), sontBalles);
+    //cv::inRange(img, cv::Scalar(40, 80, 80), cv::Scalar(80, 120, 120), sontBalles);
+
+    // Détection des balles
+    for (int x=0; x<sontBalles.cols; x++) {
+        for (int y=0; y<sontBalles.rows; y++) {
+            cv::Vec3b &couleur = img.at<cv::Vec3b>(cv::Point(x, y));
+
+            bool estBalle = true;
+
+            if (std::abs(couleur[1]-couleur[2]) > 30) {
+                estBalle = false;
+            }
+
+            if (couleur[0] > std::min(couleur[1], couleur[2])) {
+                estBalle = false;
+            }
+
+            sontBalles.at<uchar>(cv::Point(x, y)) = 255 * estBalle;
+        }
     }
 
-    cv::Mat sontBalles;
-    cv::inRange(img, cv::Scalar(0, 100, 100), cv::Scalar(40, 150, 150), sontBalles);
+    // Nettoyage (inutile ?)
+    const cv::Mat avantNettoyage = sontBalles.clone();
+
+    for (int iIteration=0; iIteration<3; iIteration++) {
+        for (int x=1; x<sontBalles.cols-1; x++) {
+            for (int y=1; y<sontBalles.rows-1; y++) {
+
+                int nbVoisinsBalles = 0;
+
+                for (int xVoisin=x-1; xVoisin<=x+1; xVoisin++) {
+                    for (int yVoisin=y-1; yVoisin<=y+1; yVoisin++) {
+                        if (xVoisin != x || yVoisin != y) {
+                            if (avantNettoyage.at<uchar>(cv::Point(xVoisin, yVoisin))) {
+                                nbVoisinsBalles++;
+                            }
+                        }
+                    }
+                }
+
+                if (nbVoisinsBalles <= 5) {
+                    sontBalles.at<uchar>(cv::Point(x, y)) = 0;
+                }
+                else if (nbVoisinsBalles >= 8) {
+                    sontBalles.at<uchar>(cv::Point(x, y)) = 255;
+                }
+            }
+        }
+    }
+
+    cv::imshow("est balle", sontBalles);
 
     int iCouleur = 0;
 
-    // Flood-fill pour détecter les balles
     for (int x=0; x<sontBalles.cols; x++) {
         for (int y=0; y<sontBalles.rows; y++) {
             uchar &color = sontBalles.at<uchar>(cv::Point(x, y));
@@ -101,15 +160,12 @@ void reconnaissanceBalles (cv::Mat &imgDepart)
             if (estBalle) {
                 const auto points = getPointsZone(sontBalles, cv::Point(x, y));
 
-                if (points.size() > 1000) {
+                if (points.size() > 1000 && points.size() < 10000) {
 
-                    // TODO: placer le centre afin de minimiser la distance max
                     long long xTotal = 0;
                     long long yTotal = 0;
 
                     for (const auto point : points) {
-                        //img.at<cv::Vec3b>(point) = COULEURS[iCouleur];
-
                         xTotal += point.x;
                         yTotal += point.y;
                     }
@@ -122,6 +178,10 @@ void reconnaissanceBalles (cv::Mat &imgDepart)
                     for (const auto point : points) {
                         const int dist = sqrt( (point.x-xCentre)*(point.x-xCentre) + (point.y-yCentre)*(point.y-yCentre) );
                         rayon = max(dist, rayon);
+                    }
+
+                    if (rayon > 40) { // L'objet détecté n'est pas une balle
+                        continue;
                     }
 
                     cv::circle(imgDepart, cv::Point(xCentre, yCentre), rayon, COULEURS[iCouleur], 5);
