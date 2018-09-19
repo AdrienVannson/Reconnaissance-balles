@@ -135,7 +135,7 @@ void reconnaissanceBalles (cv::Mat &imgDepart)
 
 int main ()
 {
-    std::vector<std::string> filenames = {
+    /*std::vector<std::string> filenames = {
         "images/000.jpg",
         "images/001.jpg",
         "images/002.jpg",
@@ -153,7 +153,27 @@ int main ()
         cv::imshow("Apres ("+filename+")", img);
     }
 
-    cv::waitKey(0);
+    cv::waitKey(0);*/
 
-    return 0;
+    cv::VideoCapture cap (0);
+
+    if (!cap.isOpened()) {
+        std::cerr << "Erreur webcam" << std::endl;
+        return -1;
+    }
+
+    cv::namedWindow("webcam", 1);
+
+    while (true) {
+        cv::Mat img;
+        cap >> img;
+
+        reconnaissanceBalles(img);
+
+        cv::imshow("webcam", img);
+
+        if (cv::waitKey(1) != 255) {
+            return 0;
+        }
+    }
 }
