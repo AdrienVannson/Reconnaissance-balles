@@ -195,12 +195,8 @@ void reconnaissanceBalles (cv::Mat &imgDepart)
 
 int main ()
 {
-    /*std::vector<std::string> filenames = {
-        "images/000.jpg",
-        "images/001.jpg",
-        "images/002.jpg",
-        "images/003.jpg",
-        "images/004.png",
+    std::vector<std::string> filenames = {
+        "pictures/010.jpg"
     };
 
     for (auto filename : filenames) {
@@ -208,14 +204,14 @@ int main ()
 
         cv::resize(img, img, cv::Size(PICTURE_HEIGHT * img.cols / img.rows, PICTURE_HEIGHT));
 
-        //cv::imshow("Avant ("+filename+")", img);
+        cv::imshow("Avant ("+filename+")", img);
         reconnaissanceBalles(img);
         cv::imshow("Apres ("+filename+")", img);
     }
 
-    cv::waitKey(0);*/
+    cv::waitKey(0);
 
-    cv::VideoCapture cap (0);
+    /*cv::VideoCapture cap (0);
 
     if (!cap.isOpened()) {
         std::cerr << "Erreur webcam" << std::endl;
@@ -235,5 +231,5 @@ int main ()
         if (cv::waitKey(1) != 255) {
             return 0;
         }
-    }
+    }*/
 }
