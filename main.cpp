@@ -4,9 +4,7 @@
 #include <queue>
 #include <cmath>
 
-#include "opencv2/imgproc.hpp"
-#include "opencv2/videoio.hpp"
-#include "opencv2/highgui.hpp"
+#include "Image/Image.hpp"
 
 using namespace std;
 
@@ -68,59 +66,32 @@ std::vector<cv::Point> getPointsZone (cv::Mat &sontBalles, const cv::Point posDe
     return points;
 }
 
-void reconnaissanceBalles (cv::Mat &imgDepart)
+
+void reconnaissanceBalles (Image &imgDepart)
 {
-    cv::Mat img = imgDepart.clone();
+    Image image = imgDepart.clone();
+    image.normaliser();
 
-    // Normalisation
-    /*for (int iLigne=0; iLigne<img.rows; iLigne++) {
-        for (int iColonne=0; iColonne<img.cols; iColonne++) {
-            cv::Vec3b &couleur = img.at<cv::Vec3b>(cv::Point(iColonne, iLigne));
+    image.afficher("Normalisé");
 
-            int somme = 0;
-            for (int iChannel=0; iChannel<3; iChannel++) {
-                somme += couleur[iChannel];
+    Image sontBalles (image.nbLignes(), image.nbColonnes());
+
+    for (int iLigne=0; iLigne<image.nbLignes(); iLigne++) {
+        for (int iColonne=0; iColonne<image.nbColonnes(); iColonne++) {
+            const Pixel pixel = image.pixel(iLigne, iColonne);
+
+            if (pixel[0] >= 48 && pixel[0] <= 100
+             && pixel[1] >= 82 && pixel[1] <= 130
+             && pixel[2] >= 51 && pixel[2] <= 95) {
+                sontBalles.setPixel(iLigne, iColonne, Pixel::BLANC);
             }
-
-            if (somme < 20) {
-                couleur = cv::Vec3b(0, 0, 0);
-            }
-            else {
-                for (int iChannel=0; iChannel<3; iChannel++) {
-                    couleur[iChannel] = 255 * couleur[iChannel] / somme;
-                }
-            }
-        }
-    }*/
-
-    //imgDepart = img.clone();
-
-    cv::Mat sontBalles (imgDepart.rows, imgDepart.cols, 0);
-
-    //cv::inRange(img, cv::Scalar(0, 100, 100), cv::Scalar(40, 150, 150), sontBalles);
-    //cv::inRange(img, cv::Scalar(40, 80, 80), cv::Scalar(80, 120, 120), sontBalles);
-
-    // Détection des balles
-    for (int x=0; x<sontBalles.cols; x++) {
-        for (int y=0; y<sontBalles.rows; y++) {
-            cv::Vec3b &couleur = img.at<cv::Vec3b>(cv::Point(x, y));
-
-            bool estBalle = true;
-
-            if (std::abs(couleur[1]-couleur[2]) > 30) {
-                estBalle = false;
-            }
-
-            if (couleur[0] > std::min(couleur[1], couleur[2])) {
-                estBalle = false;
-            }
-
-            sontBalles.at<uchar>(cv::Point(x, y)) = 255 * estBalle;
         }
     }
 
+    sontBalles.afficher("Est balle");
+
     // Nettoyage (inutile ?)
-    const cv::Mat avantNettoyage = sontBalles.clone();
+    /*const cv::Mat avantNettoyage = sontBalles.clone();
 
     for (int iIteration=0; iIteration<3; iIteration++) {
         for (int x=1; x<sontBalles.cols-1; x++) {
@@ -146,11 +117,11 @@ void reconnaissanceBalles (cv::Mat &imgDepart)
                 }
             }
         }
-    }
+    }*/
 
-    cv::imshow("est balle", sontBalles);
+    //cv::imshow("est balle", sontBalles);
 
-    int iCouleur = 0;
+    /*int iCouleur = 0;
 
     for (int x=0; x<sontBalles.cols; x++) {
         for (int y=0; y<sontBalles.rows; y++) {
@@ -190,7 +161,7 @@ void reconnaissanceBalles (cv::Mat &imgDepart)
                 }
             }
         }
-    }
+    }*/
 }
 
 int main ()
@@ -200,16 +171,16 @@ int main ()
     };
 
     for (auto filename : filenames) {
-        cv::Mat img = cv::imread(filename);
+        cv::Mat cvImage = cv::imread(filename);
+        cv::resize(cvImage, cvImage, cv::Size(PICTURE_HEIGHT * cvImage.cols / cvImage.rows, PICTURE_HEIGHT));
 
-        cv::resize(img, img, cv::Size(PICTURE_HEIGHT * img.cols / img.rows, PICTURE_HEIGHT));
+        Image image (cvImage);
 
-        cv::imshow("Avant ("+filename+")", img);
-        reconnaissanceBalles(img);
-        cv::imshow("Apres ("+filename+")", img);
+        reconnaissanceBalles(image);
+        image.afficher("Image ("+filename+")");
     }
 
-    cv::waitKey(0);
+    Image::attendreFenetres();
 
     /*cv::VideoCapture cap (0);
 
