@@ -156,7 +156,9 @@ int main ()
         cin >> nomFichier;
     }
 
-    for (auto nomFichier : nomsFichiers) {
+    for (int iFichier=0; iFichier<(int)nomsFichiers.size(); iFichier++) {
+        const string nomFichier = nomsFichiers[iFichier];
+
         cv::Mat cvImage = cv::imread(nomFichier);
         cv::resize(cvImage, cvImage, cv::Size(PICTURE_HEIGHT * cvImage.cols / cvImage.rows, PICTURE_HEIGHT));
 
@@ -164,6 +166,8 @@ int main ()
 
         reconnaissanceBalles(image);
         image.afficher("Image ("+nomFichier+")");
+
+        image.enregistrer("outputs/"+to_string(iFichier)+".jpg");
     }
 
     Image::attendreFenetres();
