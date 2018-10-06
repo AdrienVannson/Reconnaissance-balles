@@ -80,7 +80,6 @@ void reconnaissanceBalles (Image &imgDepart)
     image.normaliser();
 
     Image sontBalles (image.nbLignes(), image.nbColonnes());
-    //sontBalles.afficher("sont balles");
 
     for (int iLigne=0; iLigne<image.nbLignes(); iLigne++) {
         for (int iColonne=0; iColonne<image.nbColonnes(); iColonne++) {
