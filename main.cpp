@@ -116,7 +116,7 @@ void reconnaissanceBalles (Image &imgDepart)
             if (sontBalles.pixel(iLigne, iColonne)[0]) {
                 const vector<pair<int, int>> points = getPointsZone(sontBalles, make_pair(iLigne, iColonne));
 
-                if (points.size() > 1000) {
+                if (points.size() > 600) {
 
                     long long iLigneTotal = 0;
                     long long iColonneTotal = 0;
