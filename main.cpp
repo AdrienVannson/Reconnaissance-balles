@@ -86,36 +86,20 @@ void reconnaissanceBalles (Image &imgDepart)
         }
     }
 
+    sontBalles.afficher("Avant");
+
+    // Erosion et dilatation
+    const int taille = 2;
+
+    cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                                cv::Size(2*taille + 1, 2*taille + 1),
+                                                cv::Point(taille, taille)
+    );
+
+    cv::erode(sontBalles.image(), sontBalles.image(), element);
+    cv::dilate(sontBalles.image(), sontBalles.image(), element);
+
     sontBalles.afficher("Est balle");
-
-    // Nettoyage (inutile ?)
-    /*const cv::Mat avantNettoyage = sontBalles.clone();
-
-    for (int iIteration=0; iIteration<3; iIteration++) {
-        for (int x=1; x<sontBalles.cols-1; x++) {
-            for (int y=1; y<sontBalles.rows-1; y++) {
-
-                int nbVoisinsBalles = 0;
-
-                for (int xVoisin=x-1; xVoisin<=x+1; xVoisin++) {
-                    for (int yVoisin=y-1; yVoisin<=y+1; yVoisin++) {
-                        if (xVoisin != x || yVoisin != y) {
-                            if (avantNettoyage.at<uchar>(cv::Point(xVoisin, yVoisin))) {
-                                nbVoisinsBalles++;
-                            }
-                        }
-                    }
-                }
-
-                if (nbVoisinsBalles <= 5) {
-                    sontBalles.at<uchar>(cv::Point(x, y)) = 0;
-                }
-                else if (nbVoisinsBalles >= 8) {
-                    sontBalles.at<uchar>(cv::Point(x, y)) = 255;
-                }
-            }
-        }
-    }*/
 
     //cv::imshow("est balle", sontBalles);
 
