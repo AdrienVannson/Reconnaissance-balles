@@ -32,34 +32,41 @@ const int DELTAS_DIRECTIONS[NB_DIRECTIONS][2] = {
 };
 
 
-std::vector<cv::Point> getPointsZone (cv::Mat &sontBalles, const cv::Point posDepart)
+double getNorme (const int deltaLignes, const int deltaColonnes)
 {
-    std::vector<cv::Point> points;
+    return sqrt(deltaLignes*deltaLignes + deltaColonnes*deltaColonnes);
+}
 
-    std::queue<cv::Point> aVoir;
+
+vector<pair<int, int>> getPointsZone (Image &sontBalles, const pair<int, int> posDepart)
+{
+    vector<pair<int, int>> points;
+
+    queue<pair<int, int>> aVoir;
     aVoir.push(posDepart);
 
     while (aVoir.size()) {
-        cv::Point pos = aVoir.front();
+        const int iLigne = aVoir.front().first;
+        const int iColonne = aVoir.front().second;
         aVoir.pop();
 
-        if (sontBalles.at<uchar>(pos) != 255) {
+        if (sontBalles.pixel(iLigne, iColonne)[0] == 0) {
             continue;
         }
 
-        sontBalles.at<uchar>(pos) = 0;
-        points.push_back(pos);
+        sontBalles.setPixel(iLigne, iColonne, Pixel::NOIR);
+        points.push_back(make_pair(iLigne, iColonne));
 
         for (int iDirection=0; iDirection<NB_DIRECTIONS; iDirection++) {
-            cv::Point nouvellePos (pos.x + DELTAS_DIRECTIONS[iDirection][0],
-                                   pos.y + DELTAS_DIRECTIONS[iDirection][1]);
+            const int iNouvelleLigne = iLigne + DELTAS_DIRECTIONS[iDirection][0];
+            const int iNouvelleColonne = iColonne + DELTAS_DIRECTIONS[iDirection][1];
 
-            if (nouvellePos.x < 0 || nouvellePos.x >= sontBalles.cols
-             || nouvellePos.y < 0 || nouvellePos.y >= sontBalles.rows) {
+            if (iNouvelleLigne < 0 || iNouvelleLigne >= sontBalles.nbLignes()
+             || iNouvelleColonne < 0 || iNouvelleColonne >= sontBalles.nbColonnes()) {
                 continue;
             }
 
-            aVoir.push(nouvellePos);
+            aVoir.push(make_pair(iNouvelleLigne, iNouvelleColonne));
         }
     }
 
@@ -73,6 +80,7 @@ void reconnaissanceBalles (Image &imgDepart)
     image.normaliser();
 
     Image sontBalles (image.nbLignes(), image.nbColonnes());
+    //sontBalles.afficher("sont balles");
 
     for (int iLigne=0; iLigne<image.nbLignes(); iLigne++) {
         for (int iColonne=0; iColonne<image.nbColonnes(); iColonne++) {
@@ -86,8 +94,6 @@ void reconnaissanceBalles (Image &imgDepart)
         }
     }
 
-    sontBalles.afficher("Avant");
-
     // Erosion et dilatation
     const int taille = 2;
 
@@ -99,51 +105,44 @@ void reconnaissanceBalles (Image &imgDepart)
     cv::erode(sontBalles.image(), sontBalles.image(), element);
     cv::dilate(sontBalles.image(), sontBalles.image(), element);
 
-    sontBalles.afficher("Est balle");
+    //sontBalles.afficher("Est balle");
 
     //cv::imshow("est balle", sontBalles);
 
-    /*int iCouleur = 0;
+    int iCouleur = 0;
 
-    for (int x=0; x<sontBalles.cols; x++) {
-        for (int y=0; y<sontBalles.rows; y++) {
-            uchar &color = sontBalles.at<uchar>(cv::Point(x, y));
-            const bool estBalle = color == 255;
+    for (int iLigne=0; iLigne<sontBalles.nbLignes(); iLigne++) {
+        for (int iColonne=0; iColonne<sontBalles.nbColonnes(); iColonne++) {
+            if (sontBalles.pixel(iLigne, iColonne)[0]) {
+                const vector<pair<int, int>> points = getPointsZone(sontBalles, make_pair(iLigne, iColonne));
 
-            if (estBalle) {
-                const auto points = getPointsZone(sontBalles, cv::Point(x, y));
+                if (points.size() > 1000) {
 
-                if (points.size() > 1000 && points.size() < 10000) {
+                    long long iLigneTotal = 0;
+                    long long iColonneTotal = 0;
 
-                    long long xTotal = 0;
-                    long long yTotal = 0;
-
-                    for (const auto point : points) {
-                        xTotal += point.x;
-                        yTotal += point.y;
+                    for (const pair<int, int> point : points) {
+                        iLigneTotal += point.first;
+                        iColonneTotal += point.second;
                     }
 
-                    const int xCentre = xTotal / (int)points.size();
-                    const int yCentre = yTotal / (int)points.size();
+                    const int iLigneCentre = iLigneTotal / (int)points.size();
+                    const int iColonneCentre = iColonneTotal / (int)points.size();
 
                     // Calcul du rayon
                     int rayon = 0;
-                    for (const auto point : points) {
-                        const int dist = sqrt( (point.x-xCentre)*(point.x-xCentre) + (point.y-yCentre)*(point.y-yCentre) );
+                    for (const pair<int, int> point : points) {
+                        const int dist = getNorme(point.first - iLigneCentre, point.second - iColonneCentre);
                         rayon = max(dist, rayon);
                     }
 
-                    if (rayon > 40) { // L'objet détecté n'est pas une balle
-                        continue;
-                    }
-
-                    cv::circle(imgDepart, cv::Point(xCentre, yCentre), rayon, COULEURS[iCouleur], 5);
+                    cv::circle(imgDepart.image(), cv::Point(iColonneCentre, iLigneCentre), rayon, COULEURS[iCouleur], 5);
 
                     iCouleur = (iCouleur+1) % NB_COULEURS;
                 }
             }
         }
-    }*/
+    }
 }
 
 int main ()
