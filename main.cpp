@@ -106,8 +106,6 @@ void reconnaissanceBalles (Image &imgDepart)
 
     //sontBalles.afficher("Est balle");
 
-    //cv::imshow("est balle", sontBalles);
-
     int iCouleur = 0;
 
     for (int iLigne=0; iLigne<sontBalles.nbLignes(); iLigne++) {
