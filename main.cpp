@@ -148,18 +148,24 @@ void reconnaissanceBalles (Image &imgDepart)
 
 int main ()
 {
-    std::vector<std::string> filenames = {
-        "pictures/010.jpg"
-    };
+    vector<string> nomsFichiers;
 
-    for (auto filename : filenames) {
-        cv::Mat cvImage = cv::imread(filename);
+    string nomFichier;
+    cin >> nomFichier;
+
+    while (!cin.fail()) {
+        nomsFichiers.push_back(nomFichier);
+        cin >> nomFichier;
+    }
+
+    for (auto nomFichier : nomsFichiers) {
+        cv::Mat cvImage = cv::imread(nomFichier);
         cv::resize(cvImage, cvImage, cv::Size(PICTURE_HEIGHT * cvImage.cols / cvImage.rows, PICTURE_HEIGHT));
 
         Image image (cvImage);
 
         reconnaissanceBalles(image);
-        image.afficher("Image ("+filename+")");
+        image.afficher("Image ("+nomFichier+")");
     }
 
     Image::attendreFenetres();
