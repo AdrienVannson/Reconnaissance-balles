@@ -80,9 +80,9 @@ void reconnaissanceBalles (Image &imgDepart)
         for (int iColonne=0; iColonne<image.nbColonnes(); iColonne++) {
             const Pixel pixel = image.pixel(iLigne, iColonne);
 
-            if (pixel[0] >= 48 && pixel[0] <= 100
-             && pixel[1] >= 82 && pixel[1] <= 130
-             && pixel[2] >= 51 && pixel[2] <= 95) {
+            if (pixel[0] >= 62 && pixel[0] <= 91
+             && pixel[1] >= 98 && pixel[1] <= 134
+             && pixel[2] >= 50 && pixel[2] <= 80) {
                 sontBalles.setPixel(iLigne, iColonne, Pixel::BLANC);
             }
         }
