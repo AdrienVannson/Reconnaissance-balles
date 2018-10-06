@@ -72,8 +72,6 @@ void reconnaissanceBalles (Image &imgDepart)
     Image image = imgDepart.clone();
     image.normaliser();
 
-    image.afficher("Normalisé");
-
     Image sontBalles (image.nbLignes(), image.nbColonnes());
 
     for (int iLigne=0; iLigne<image.nbLignes(); iLigne++) {
