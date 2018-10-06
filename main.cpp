@@ -94,15 +94,22 @@ void reconnaissanceBalles (Image &imgDepart)
     }
 
     // Erosion et dilatation
-    const int taille = 2;
+    const int tailleErosion = 2;
+    const int tailleDilatation = 3;
 
-    cv::Mat element = cv::getStructuringElement(cv::MORPH_ELLIPSE,
-                                                cv::Size(2*taille + 1, 2*taille + 1),
-                                                cv::Point(taille, taille)
+    cv::erode(sontBalles.image(),
+              sontBalles.image(),
+              cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                        cv::Size(2*tailleErosion + 1, 2*tailleErosion + 1),
+                                        cv::Point(tailleErosion, tailleErosion))
     );
 
-    cv::erode(sontBalles.image(), sontBalles.image(), element);
-    cv::dilate(sontBalles.image(), sontBalles.image(), element);
+    cv::dilate(sontBalles.image(),
+              sontBalles.image(),
+              cv::getStructuringElement(cv::MORPH_ELLIPSE,
+                                        cv::Size(2*tailleDilatation + 1, 2*tailleDilatation + 1),
+                                        cv::Point(tailleDilatation, tailleDilatation))
+    );
 
     //sontBalles.afficher("Est balle");
 
