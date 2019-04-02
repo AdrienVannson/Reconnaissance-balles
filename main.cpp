@@ -140,7 +140,8 @@ void reconnaissanceBalles (Image &imgDepart)
                         rayon = max(dist, rayon);
                     }
 
-                    cv::circle(imgDepart.image(), cv::Point(iColonneCentre, iLigneCentre), rayon, COULEURS[iCouleur], 5);
+                    //cv::circle(imgDepart.image(), cv::Point(iColonneCentre, iLigneCentre), rayon, COULEURS[iCouleur], 5);
+                    cv::circle(imgDepart.image(), cv::Point(iColonneCentre, iLigneCentre), rayon, cv::Scalar(0, 0, 255), 5);
 
                     iCouleur = (iCouleur+1) % NB_COULEURS;
                 }
