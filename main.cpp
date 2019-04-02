@@ -165,18 +165,27 @@ int main ()
     for (int iFichier=0; iFichier<(int)nomsFichiers.size(); iFichier++) {
         const string nomFichier = nomsFichiers[iFichier];
 
+        string nomFichierSortie;
+        for (int iCaractere=(int)nomFichier.size()-1; iCaractere>=0; iCaractere--) {
+            if (nomFichier[iCaractere] == '/') {
+                break;
+            }
+            nomFichierSortie = nomFichier[iCaractere] + nomFichierSortie;
+        }
+
         cv::Mat cvImage = cv::imread(nomFichier);
         cv::resize(cvImage, cvImage, cv::Size(PICTURE_HEIGHT * cvImage.cols / cvImage.rows, PICTURE_HEIGHT));
 
         Image image (cvImage);
 
         reconnaissanceBalles(image);
-        image.afficher("Image ("+nomFichier+")");
+        //image.afficher("Image ("+nomFichier+")");
 
-        image.enregistrer("outputs/"+to_string(iFichier)+".jpg");
+        //image.enregistrer("outputs/"+to_string(iFichier)+".jpg");
+        image.enregistrer("outputs/"+nomFichierSortie);
     }
 
-    Image::attendreFenetres();
+    //Image::attendreFenetres();
 
     /*cv::VideoCapture cap (0);
 
