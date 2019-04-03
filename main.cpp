@@ -203,7 +203,7 @@ int main (int argc, char* argv[])
     else if (strcmp(argv[1], "detect") == 0) {
 
         for (const string &nomFichier : fichiers) {
-            cerr << "Traitement: " << nomFichier << endl;
+            cerr << "Processing: " << nomFichier << endl;
 
             string nomFichierSortie;
             for (int iCaractere=(int)nomFichier.size()-1; iCaractere>=0; iCaractere--) {
