@@ -86,8 +86,8 @@ void reconnaissanceBalles (Image &imgDepart)
         for (int iColonne=0; iColonne<image.nbColonnes(); iColonne++) {
             const Pixel pixel = image.pixel(iLigne, iColonne);
 
-            if (pixel[2] <= 40) { // Peu de bleu
-                if (abs(pixel[0] - pixel[1]) <= 70) { // Autant de rouge que de vert
+            if (pixel[2] <= 30) { // Peu de bleu
+                if (abs(pixel[0] - pixel[1]) <= 40) { // Autant de rouge que de vert
                     sontBalles.setPixel(iLigne, iColonne, Pixel::BLANC);
                 }
             }
@@ -121,7 +121,7 @@ void reconnaissanceBalles (Image &imgDepart)
             if (sontBalles.pixel(iLigne, iColonne)[0]) {
                 const vector<pair<int, int>> points = getPointsZone(sontBalles, make_pair(iLigne, iColonne));
 
-                if (points.size() >= 200) {
+                if (points.size() >= 100) {
 
                     long long iLigneTotal = 0;
                     long long iColonneTotal = 0;
