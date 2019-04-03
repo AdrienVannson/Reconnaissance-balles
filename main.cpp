@@ -86,10 +86,10 @@ void reconnaissanceBalles (Image &imgDepart)
         for (int iColonne=0; iColonne<image.nbColonnes(); iColonne++) {
             const Pixel pixel = image.pixel(iLigne, iColonne);
 
-            if (pixel[0] >= 62 && pixel[0] <= 91
-             && pixel[1] >= 98 && pixel[1] <= 134
-             && pixel[2] >= 50 && pixel[2] <= 80) {
-                sontBalles.setPixel(iLigne, iColonne, Pixel::BLANC);
+            if (pixel[2] <= 30) { // Peu de bleu
+                if (abs(pixel[0] - pixel[1]) <= 70) { // Autant de rouge que de vert
+                    sontBalles.setPixel(iLigne, iColonne, Pixel::BLANC);
+                }
             }
         }
     }
@@ -196,9 +196,9 @@ int main (int argc, char* argv[])
 
         cout << "Seuils :\n";
 
-        cout << "Rouge : " << rouges[ (int)(0.2*rouges.size()) ] << " " << rouges[ (int)(0.8*rouges.size()) ] << "\n";
-        cout << "Vert : " << verts[ (int)(0.2*verts.size()) ] << " " << verts[ (int)(0.8*verts.size()) ] << "\n";
-        cout << "Bleu : " << bleus[ (int)(0.2*bleus.size()) ] << " " << bleus[ (int)(0.8*bleus.size()) ] << "\n";
+        cout << "Rouge : " << rouges[ (int)(0.05*rouges.size()) ] << " " << rouges[ (int)(0.95*rouges.size()) ] << "\n";
+        cout << "Vert : " << verts[ (int)(0.05*verts.size()) ] << " " << verts[ (int)(0.95*verts.size()) ] << "\n";
+        cout << "Bleu : " << bleus[ (int)(0.05*bleus.size()) ] << " " << bleus[ (int)(0.95*bleus.size()) ] << "\n";
     }
     else if (strcmp(argv[1], "detect") == 0) {
 
