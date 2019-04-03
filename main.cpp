@@ -214,7 +214,7 @@ int main (int argc, char* argv[])
             }
 
             cv::Mat cvImage = cv::imread(nomFichier);
-            cv::resize(cvImage, cvImage, cv::Size(PICTURE_HEIGHT * cvImage.cols / cvImage.rows, PICTURE_HEIGHT));
+            //cv::resize(cvImage, cvImage, cv::Size(PICTURE_HEIGHT * cvImage.cols / cvImage.rows, PICTURE_HEIGHT));
 
             Image image (cvImage);
 
