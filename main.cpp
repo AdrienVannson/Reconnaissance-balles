@@ -86,7 +86,7 @@ void reconnaissanceBalles (Image &imgDepart)
         for (int iColonne=0; iColonne<image.nbColonnes(); iColonne++) {
             const Pixel pixel = image.pixel(iLigne, iColonne);
 
-            if (pixel[2] <= 30) { // Peu de bleu
+            if (pixel[2] <= 40) { // Peu de bleu
                 if (abs(pixel[0] - pixel[1]) <= 70) { // Autant de rouge que de vert
                     sontBalles.setPixel(iLigne, iColonne, Pixel::BLANC);
                 }
