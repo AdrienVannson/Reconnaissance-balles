@@ -3,6 +3,7 @@
 #include <string>
 #include <queue>
 #include <cmath>
+#include <cstring>
 
 #include "Image/Image.hpp"
 
@@ -150,62 +151,83 @@ void reconnaissanceBalles (Image &imgDepart)
     }
 }
 
-int main ()
+int main (int argc, char* argv[])
 {
-    vector<string> nomsFichiers;
-
-    string nomFichier;
-    cin >> nomFichier;
-
-    while (!cin.fail()) {
-        nomsFichiers.push_back(nomFichier);
-        cin >> nomFichier;
+    if (argc <= 2) {
+        cerr << "Error: too few arguments" << endl;
+        return 0;
     }
 
-    for (int iFichier=0; iFichier<(int)nomsFichiers.size(); iFichier++) {
-        const string nomFichier = nomsFichiers[iFichier];
-
-        string nomFichierSortie;
-        for (int iCaractere=(int)nomFichier.size()-1; iCaractere>=0; iCaractere--) {
-            if (nomFichier[iCaractere] == '/') {
-                break;
-            }
-            nomFichierSortie = nomFichier[iCaractere] + nomFichierSortie;
-        }
-
-        cv::Mat cvImage = cv::imread(nomFichier);
-        cv::resize(cvImage, cvImage, cv::Size(PICTURE_HEIGHT * cvImage.cols / cvImage.rows, PICTURE_HEIGHT));
-
-        Image image (cvImage);
-
-        reconnaissanceBalles(image);
-        //image.afficher("Image ("+nomFichier+")");
-
-        //image.enregistrer("outputs/"+to_string(iFichier)+".jpg");
-        image.enregistrer("outputs/"+nomFichierSortie);
+    vector<string> fichiers;
+    for (int iFichier=2; iFichier<argc; iFichier++) {
+        fichiers.push_back(argv[iFichier]);
     }
 
-    //Image::attendreFenetres();
-
-    /*cv::VideoCapture cap (0);
-
-    if (!cap.isOpened()) {
-        std::cerr << "Erreur webcam" << std::endl;
-        return -1;
-    }
-
-    cv::namedWindow("webcam", 1);
-
-    while (true) {
-        cv::Mat img;
-        cap >> img;
-
-        reconnaissanceBalles(img);
-
-        cv::imshow("webcam", img);
-
-        if (cv::waitKey(1) != 255) {
+    if (strcmp(argv[1], "train") == 0) {
+        if (argc != 3) {
+            cerr << "Error: a single file is required for training" << endl;
             return 0;
         }
-    }*/
+
+        cv::Mat cvImage = cv::imread(string(argv[2]));
+
+        Image image (cvImage);
+        image.normaliser();
+
+        vector<int> rouges, verts, bleus;
+
+        for (int iLigne=0; iLigne<image.nbLignes(); iLigne++) {
+            for (int iColonne=0; iColonne<image.nbColonnes(); iColonne++) {
+                const Pixel pixel = image.pixel(iLigne, iColonne);
+
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) { // Ignorer les pixels noirs
+                    continue;
+                }
+
+                rouges.push_back(pixel[Pixel::I_ROUGE]);
+                verts.push_back(pixel[Pixel::I_VERT]);
+                bleus.push_back(pixel[Pixel::I_BLEU]);
+            }
+        }
+
+        sort(rouges.begin(), rouges.end());
+        sort(verts.begin(), verts.end());
+        sort(bleus.begin(), bleus.end());
+
+        cout << "Seuils :\n";
+
+        cout << "Rouge : " << rouges[ (int)(0.2*rouges.size()) ] << " " << rouges[ (int)(0.8*rouges.size()) ] << "\n";
+        cout << "Vert : " << verts[ (int)(0.2*verts.size()) ] << " " << verts[ (int)(0.8*verts.size()) ] << "\n";
+        cout << "Bleu : " << bleus[ (int)(0.2*bleus.size()) ] << " " << bleus[ (int)(0.8*bleus.size()) ] << "\n";
+    }
+    else if (strcmp(argv[1], "detect") == 0) {
+
+        for (const string &nomFichier : fichiers) {
+
+            string nomFichierSortie;
+            for (int iCaractere=(int)nomFichier.size()-1; iCaractere>=0; iCaractere--) {
+                if (nomFichier[iCaractere] == '/') {
+                    break;
+                }
+                nomFichierSortie = nomFichier[iCaractere] + nomFichierSortie;
+            }
+
+            cv::Mat cvImage = cv::imread(nomFichier);
+            cv::resize(cvImage, cvImage, cv::Size(PICTURE_HEIGHT * cvImage.cols / cvImage.rows, PICTURE_HEIGHT));
+
+            Image image (cvImage);
+
+            reconnaissanceBalles(image);
+            //image.afficher("Image ("+nomFichier+")");
+
+            image.enregistrer("outputs/"+nomFichierSortie);
+        }
+
+        //Image::attendreFenetres();
+
+    }
+    else {
+        cerr << "Error: wrong command name" << endl;
+        return 0;
+    }
 }
